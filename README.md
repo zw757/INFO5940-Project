@@ -1,32 +1,56 @@
-# AI Closet & Personal Shopping Agent
+# ClosetCast
 
-An INFO 5940 project that helps users organize their wardrobe and decide what to wear, pack, or buy for everyday life, travel, and special occasions. The AI considers the user's existing clothes, personal style, weather, activities, and budget to create practical outfit recommendations.
-
-Users can ask for a daily outfit, upload a travel itinerary, or share details about an upcoming event, such as a wedding, interview, or formal dinner. The assistant can suggest outfits for each activity, build a packing list using versatile pieces, and identify anything worth buying to complete the look. Recommendations start with what the user already owns and explain how each suggested addition meets their plans and fits their wardrobe.
-
-## MVP
-
-- Upload clothing photos and review AI-generated categories.
-- Get outfits based on style, weather, and occasion.
-- Upload an itinerary or describe an event to plan outfits and a packing list.
-- Save outfits, swap pieces, and give feedback.
-- Identify wardrobe gaps and recommend purchases for everyday needs, trips, or events.
-- Build a monthly cart within a budget and approve simulated checkout.
-
-The key idea is **outfit-first shopping**: explain how a purchase works with the user's closet, including when buying nothing is the best choice. The MVP uses a curated catalog; real payments and live retailer integrations are out of scope.
-
-## Documentation
-
-- [Vision](VISION.md) — purpose, scope, and success criteria
-- [Technical Environment](TECHNICAL_ENVIRONMENT.md) — proposed stack and development practices
-- [Inception](docs/inception/README.md) — requirements, stories, architecture, and delivery plan
-
-Status: planning drafts prepared; team review pending. Implementation has not started.
-
-Technical direction: Python backend, simple web UI, and a hosted AI API with vision and tool calling for weather/places. Claude Code is the chosen AI-DLC coding agent; setup is pending.
+**An AI stylist that plans daily outfits, event outfits and trip packing lists from the clothes you already own.**
 
 ## Team
 
-- May Wu — `zw757`
-- Katherine Yang — `ky453`
-- Emma Dai — `cd663`
+| Full name | NetID | Role focus |
+| --- | --- | --- |
+| May Wu | zw757 | AI-DLC driver and commits; input documents |
+| Katherine Yang | ky453 | Product decisions, user stories and personas |
+| Emma Dai | cd663 | Application design, technical decisions and review |
+
+## Tools
+
+- **AI coding agent:** Claude Code
+- **Methodology:** **AI-DLC v1.0.1** ([release](https://github.com/awslabs/aidlc-workflows/releases/tag/v1.0.1)), installed at `CLAUDE.md` and `.aidlc-rule-details/`
+- **LLM in the product:** Google Gemini API, `gemini-2.5-flash` (configurable)
+- **Other services:** Open-Meteo (weather, geocoding), OpenStreetMap Nominatim (places)
+
+## Problem and why an LLM fits
+
+Getting dressed means weighing several things at once: the weather, the day's activities, the dress expectations of each place, personal style and, when traveling, luggage space. People handle this badly. Day to day, they rotate the same few outfits while most of their closet goes unworn. For trips and events, they overpack, forget the one item they needed, or misread dress codes like "cocktail attire." ClosetCast is for college students and young professionals who want quick, reliable answers to three questions: *What should I wear today? What should I wear to this event? What should I pack for this trip?* It answers using only clothes the user owns and says clearly what is missing.
+
+An LLM fits because almost every input is unstructured and needs judgment. Clothing arrives as photos, which a vision model turns into structured attributes far faster than typing. Itineraries arrive as free text or PDFs ("Day 2: Sagrada Família, tapas, then a rooftop bar") that must be split into days, places and activities. Dress codes and cultural norms ("covered shoulders at churches") need interpretation, not lookup. Picking an outfit trades off weather, activity, formality and taste at once, and the user needs an explanation they can trust. Existing closet apps match outfits to temperature with fixed rules; they can't read an itinerary, interpret a dress code or explain a choice.
+
+## Planned LLM integration
+
+ClosetCast is an **LLM agent with tools**, built as a small custom function-calling loop on the **Google Gemini API** (`gemini-2.5-flash`, set by config) via the `google-genai` SDK. LLM capabilities appear in four places: **vision tagging** turns each closet photo into an editable item record; **parsing** turns itineraries and event descriptions into structured days and occasions; the **agent loop** chooses which tools to call (`get_weather`, `geocode`, `lookup_place`, `get_dress_code_guidance`, `search_closet`, `get_style_profile`, `optimize_packing`, `build_search_link`) and combines the results into outfits with explanations; and **refinement** revises a plan from plain-language feedback ("no skirts this trip"). Features that depend on the LLM: closet tagging, daily outfits, the occasion planner, the trip planner, the gap finder and refinement.
+
+We deliberately keep some work out of the LLM. The packing optimizer is deterministic Python, because LLMs are unreliable at counting. Every proposed outfit is checked in code against the closet database, so the app never recommends clothes the user doesn't own, and all LLM output is parsed into validated Pydantic schemas. We chose a hosted model over a local Ollama model because we need reliable image understanding and tool calling together, which small local models handle inconsistently on student laptops.
+
+## Scope and feasibility
+
+By December 16, ClosetCast will be a locally running web app (FastAPI with server-rendered pages) with eight MVP features: (1) a digital closet with AI photo tagging, (2) a style profile with outfit ratings, (3) daily outfits from live weather, (4) an occasion planner that interprets dress codes, (5) a trip planner that reads an itinerary and plans each day, (6) a packing optimizer that fits the plan into the chosen luggage, (7) a gap finder that explains what to buy with search links, and (8) plain-language refinement. This combines vision, document parsing, multi-step tool use and optimization, well beyond a single feature.
+
+It stays achievable because it runs locally for one user and uses free data sources (only Gemini needs a key). The riskiest ideas are out of scope: price comparison and scraping, checkout, virtual try-on, a mobile app, email or calendar import, and accounts. The critical path is features 1 → 3 → 5 → 6; features 7 and 8 can be simplified if time runs short. Details: [`docs/vision.md`](docs/vision.md) and [`docs/technical-environment.md`](docs/technical-environment.md).
+
+## Collaboration plan
+
+- **Meetings:** twice a week, ~90 minutes, on **[TODO: days]** at **[TODO: place]**, with Zoom as backup. The first meeting is dedicated to the problem, users and why an LLM fits.
+- **AI-DLC sessions:** run together. One member drives Claude Code with screen shared; the team agrees on every answer and approval, which AI-DLC records in `aidlc-docs/audit.md`.
+- **Between meetings:** **[TODO: chat tool]** for quick questions; GitHub Issues for tasks. Everyone reads newly generated AI-DLC documents before the next session.
+- **Construction:** each member owns AI-DLC units of work, uses feature branches, and gets PRs reviewed by a teammate. Everyone shares testing, the demo video and the presentation.
+
+## Repository structure
+
+```text
+CLAUDE.md                  # AI-DLC v1.0.1 core workflow
+.aidlc-rule-details/       # AI-DLC v1.0.1 stage rules
+docs/
+  vision.md                # Input to AI-DLC
+  technical-environment.md # Input to AI-DLC
+aidlc-docs/                # Generated by AI-DLC (audit, state, inception artifacts)
+```
+
+Application code (`src/`, `tests/`) is added at the repo root during Construction.
