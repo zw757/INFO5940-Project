@@ -4,11 +4,11 @@
 
 ## Team
 
-| Full name | NetID | Role focus |
-| --- | --- | --- |
-| May Wu | zw757 | AI-DLC driver and commits; input documents |
-| Katherine Yang | ky453 | Product decisions, user stories and personas |
-| Emma Dai | cd663 | Application design, technical decisions and review |
+| Full name | NetID |
+| --- | --- |
+| May Wu | zw757 |
+| Katherine Yang | ky453 |
+| Emma Dai | cd663 |
 
 ## Tools
 
