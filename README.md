@@ -14,7 +14,7 @@
 
 - **AI coding agent:** Claude Code
 - **Methodology:** **AI-DLC v1.0.1** ([release](https://github.com/awslabs/aidlc-workflows/releases/tag/v1.0.1)), installed at `CLAUDE.md` and `.aidlc-rule-details/`
-- **LLM in the product:** Google Gemini API, `gemini-2.5-flash` (configurable)
+- **LLM in the product:** OpenAI API (vision-capable models set by config: `OPENAI_MODEL_FAST`, `OPENAI_MODEL_AGENT`). Changed from Google Gemini on 2026-11-19 during AI-DLC Requirements Analysis.
 - **Other services:** Open-Meteo (weather, geocoding), OpenStreetMap Nominatim (places)
 
 ## Problem and why an LLM fits
@@ -25,7 +25,7 @@ An LLM fits because almost every input is unstructured and needs judgment. Cloth
 
 ## Planned LLM integration
 
-ClosetCast is an **LLM agent with tools**, built as a small custom function-calling loop on the **Google Gemini API** (`gemini-2.5-flash`, set by config) via the `google-genai` SDK. LLM capabilities appear in four places: **vision tagging** turns each closet photo into an editable item record; **parsing** turns itineraries and event descriptions into structured days and occasions; the **agent loop** chooses which tools to call (`get_weather`, `geocode`, `lookup_place`, `get_dress_code_guidance`, `search_closet`, `get_style_profile`, `optimize_packing`, `build_search_link`) and combines the results into outfits with explanations; and **refinement** revises a plan from plain-language feedback ("no skirts this trip"). Features that depend on the LLM: closet tagging, daily outfits, the occasion planner, the trip planner, the gap finder and refinement.
+ClosetCast is an **LLM agent with tools**, built as a small custom function-calling loop on the **OpenAI API** (models set by config) via the official `openai` Python SDK. LLM capabilities appear in four places: **vision tagging** turns each closet photo into an editable item record; **parsing** turns itineraries and event descriptions into structured days and occasions; the **agent loop** chooses which tools to call (`get_weather`, `geocode`, `lookup_place`, `get_dress_code_guidance`, `search_closet`, `get_style_profile`, `optimize_packing`, `build_search_link`) and combines the results into outfits with explanations; and **refinement** revises a plan from plain-language feedback ("no skirts this trip"). Features that depend on the LLM: closet tagging, daily outfits, the occasion planner, the trip planner, the gap finder and refinement.
 
 We deliberately keep some work out of the LLM. The packing optimizer is deterministic Python, because LLMs are unreliable at counting. Every proposed outfit is checked in code against the closet database, so the app never recommends clothes the user doesn't own, and all LLM output is parsed into validated Pydantic schemas. We chose a hosted model over a local Ollama model because we need reliable image understanding and tool calling together, which small local models handle inconsistently on student laptops.
 
@@ -33,7 +33,7 @@ We deliberately keep some work out of the LLM. The packing optimizer is determin
 
 By December 16, ClosetCast will be a locally running web app (FastAPI with server-rendered pages) with eight MVP features: (1) a digital closet with AI photo tagging, (2) a style profile with outfit ratings, (3) daily outfits from live weather, (4) an occasion planner that interprets dress codes, (5) a trip planner that reads an itinerary and plans each day, (6) a packing optimizer that fits the plan into the chosen luggage, (7) a gap finder that explains what to buy with search links, and (8) plain-language refinement. This combines vision, document parsing, multi-step tool use and optimization, well beyond a single feature.
 
-It stays achievable because it runs locally for one user and uses free data sources (only Gemini needs a key). The riskiest ideas are out of scope: price comparison and scraping, checkout, virtual try-on, a mobile app, email or calendar import, and accounts. The critical path is features 1 → 3 → 5 → 6; features 7 and 8 can be simplified if time runs short. Details: [`docs/vision.md`](docs/vision.md) and [`docs/technical-environment.md`](docs/technical-environment.md).
+It stays achievable because it runs locally for one user and uses free data sources (only OpenAI needs a key; each team member uses their own key with a monthly budget). The riskiest ideas are out of scope: price comparison and scraping, checkout, virtual try-on, a mobile app, email or calendar import, and accounts. The critical path is features 1 → 3 → 5 → 6; features 7 and 8 can be simplified if time runs short. Details: [`docs/vision.md`](docs/vision.md) and [`docs/technical-environment.md`](docs/technical-environment.md).
 
 ## Collaboration plan
 

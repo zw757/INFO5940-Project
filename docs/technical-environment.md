@@ -1,13 +1,16 @@
 # Technical Environment: ClosetCast
 
+> **Change log**
+> - **2026-11-19 (AI-DLC Requirements Analysis):** LLM provider changed from Google Gemini to **OpenAI** by team decision (requirement-verification Q18, clarification Q2–Q4; see `aidlc-docs/audit.md`). All Gemini / `google-genai` references below were replaced with OpenAI / `openai` equivalents.
+
 ## Project Technical Summary
 
 | Item | Decision |
 | --- | --- |
 | Project type | Greenfield, single-user web application |
 | Deployment | **Runs locally only** on each team member's laptop (macOS, Windows or Linux). No cloud hosting. |
-| How it runs | A FastAPI server started with `uv run closetcast` serves both the web UI (server-rendered HTML) and a JSON API at `http://127.0.0.1:8000`. It calls the Google Gemini API (hosted LLM) for vision tagging and agent reasoning, and free public APIs for weather and places. Data is stored in a local SQLite file. |
-| LLM provider | **Google Gemini API** (Google AI Studio API key, free tier). Default model: a Flash-tier multimodal model (`gemini-2.5-flash`), set by the `GEMINI_MODEL` environment variable so it can change without code changes. Confirm the current free-tier model list in Google AI Studio before Construction. |
+| How it runs | A FastAPI server started with `uv run closetcast` serves both the web UI (server-rendered HTML) and a JSON API at `http://127.0.0.1:8000`. It calls the OpenAI API (hosted LLM) for vision tagging and agent reasoning, and free public APIs for weather and places. Data is stored in a local SQLite file. |
+| LLM provider | **OpenAI API** (paid; each team member uses their own API key with a monthly budget set in the OpenAI dashboard). Two models, set by environment variables so they can change without code changes: `OPENAI_MODEL_FAST` (small, low-cost model for vision tagging and itinerary/event parsing) and `OPENAI_MODEL_AGENT` (stronger model for the agent's tool-calling and reasoning). Both must support image input, function calling and JSON-schema structured output. Confirm current model names on OpenAI's models page before Construction. |
 | Timeline | Student team project; Construction runs Nov 24 – Dec 16, 2026 |
 
 ## Programming Languages
@@ -49,7 +52,7 @@
 | FastAPI | Web framework for the JSON API and HTML pages |
 | Uvicorn | ASGI server for local runs |
 | Pydantic v2 + pydantic-settings | Request/response validation, LLM structured output schemas, configuration from `.env` |
-| google-genai (`from google import genai`) | Official Google Gen AI SDK for Gemini: vision tagging, structured output, function calling |
+| openai (`from openai import AsyncOpenAI`) | Official OpenAI Python SDK: vision tagging, structured output, function calling |
 | httpx (async) | All outbound HTTP calls (weather, geocoding, places) |
 | SQLModel (on SQLAlchemy 2.x) + SQLite | Local persistence for closet items, style profile, ratings, trips, plans |
 | Jinja2 | Server-rendered HTML templates |
@@ -70,9 +73,9 @@
 
 | Prohibited | Reason | Use instead |
 | --- | --- | --- |
-| LangChain, LlamaIndex, CrewAI, AutoGen | Heavy abstractions that hide the tool-calling loop, make debugging hard, and change APIs frequently | A small custom agent loop using google-genai function calling (≤ 200 lines) |
-| `google-generativeai` (legacy Gemini SDK) | Deprecated predecessor of the current SDK | `google-genai` |
-| `openai` SDK pointed at Gemini | Two ways to call the same model causes confusion | `google-genai` only |
+| LangChain, LlamaIndex, CrewAI, AutoGen | Heavy abstractions that hide the tool-calling loop, make debugging hard, and change APIs frequently | A small custom agent loop using OpenAI function calling (≤ 200 lines) |
+| `google-genai`, `google-generativeai` (Gemini SDKs) | LLM provider changed to OpenAI (2026-11-19); a second provider would double prompt and schema testing | `openai` |
+| Third-party OpenAI wrappers (e.g., LiteLLM) | Hide the request/response shapes the agent loop depends on | `openai` SDK directly |
 | requests | Blocking; stalls the async event loop | httpx (async) |
 | Flask, Django | Project uses FastAPI | FastAPI |
 | React, Vue, Next.js, Svelte | Requires a JS build toolchain; not needed for the MVP UI | Jinja2 + HTMX |
@@ -92,7 +95,7 @@
 
 | Service | Purpose | Constraints |
 | --- | --- | --- |
-| Google Gemini API (`generativelanguage.googleapis.com`) | Vision tagging, itinerary parsing, dress-code reasoning, agent tool calling | Free-tier rate limits apply (on the order of 10 requests/minute for Flash models): queue photo tagging, retry with backoff, cache results. Model name from `GEMINI_MODEL`. |
+| OpenAI API (`api.openai.com`) | Vision tagging, itinerary parsing, dress-code reasoning, agent tool calling | Paid per request. Per-minute request and token limits depend on each account's usage tier: queue photo tagging with limited concurrency, retry with backoff on `429`, cache results. Model names from `OPENAI_MODEL_FAST` / `OPENAI_MODEL_AGENT`. |
 | Open-Meteo Forecast API (`api.open-meteo.com/v1/forecast`) | Daily forecast up to 16 days ahead | No key. Free for non-commercial use. |
 | Open-Meteo Historical Weather API (`archive-api.open-meteo.com/v1/archive`) | Typical weather for trip dates beyond the forecast horizon (average of the same dates over the past 5 years) | No key. Cache results in SQLite. |
 | Open-Meteo Geocoding API (`geocoding-api.open-meteo.com/v1/search`) | City name → latitude/longitude | No key. |
@@ -132,11 +135,11 @@ data/                # Local SQLite DB and uploaded photos (gitignored)
 
 ### Agent design rules
 
-- **Custom tool-calling loop** using Gemini function calling: the model receives tool declarations, chooses tools, the app executes them and returns results, repeating until the model produces a final answer. Hard cap of **8 tool calls per request**; on hitting the cap the agent returns its best partial answer with a note.
+- **Custom tool-calling loop** using OpenAI function calling: the model receives tool declarations, chooses tools, the app executes them and returns results, repeating until the model produces a final answer. Hard cap of **8 tool calls per request**; on hitting the cap the agent returns its best partial answer with a note.
 - **Expected tools** (final set decided in Application Design): `get_weather(city, date)` (forecast, or historical average when beyond 16 days), `geocode(city)`, `lookup_place(name, city)`, `get_dress_code_guidance(event_or_venue_type)`, `search_closet(filters)`, `get_style_profile()`, `optimize_packing(trip_plan, luggage_size, rewear_rules)`, `build_search_link(item_description)`.
 - **The LLM references clothes only by closet item ID.** Every outfit the LLM proposes passes through `validate_outfit()` (deterministic code) before it reaches the user; unknown IDs are rejected and the agent is asked to retry once.
 - **Counting and optimization are done in code, not by the LLM.** The packing optimizer is a deterministic Python function (greedy selection with constraint checks) with unit tests.
-- **Structured output everywhere:** every LLM response the app consumes is parsed into a Pydantic model via Gemini's JSON-schema structured output. Free-text responses are only used for explanations shown to the user.
+- **Structured output everywhere:** every LLM response the app consumes is parsed into a Pydantic model via OpenAI's JSON-schema structured output. Free-text responses are only used for explanations shown to the user.
 - **The LLM client sits behind an interface** (`Protocol`) so all tests run with a fake client and no API key.
 
 ### API design
@@ -167,7 +170,7 @@ data/                # Local SQLite DB and uploaded photos (gitignored)
 
 ### Secrets management
 
-- The Gemini API key is read from `GEMINI_API_KEY` in a local `.env` file loaded by pydantic-settings. `.env` is in `.gitignore`; a committed `.env.example` lists variable names with empty values.
+- The OpenAI API key is read from `OPENAI_API_KEY` in a local `.env` file loaded by pydantic-settings. `.env` is in `.gitignore`; a committed `.env.example` lists variable names with empty values.
 - **No API keys or secrets are ever committed** to the repository, written to logs, or included in error messages.
 
 ### Input validation
@@ -178,7 +181,7 @@ data/                # Local SQLite DB and uploaded photos (gitignored)
 
 ### Data protection and privacy
 
-- All personal data (closet photos, profile, trips) stays on the local machine except the content sent to the Gemini API for processing. The UI shows a one-time notice explaining that clothing photos and itinerary text are sent to Google's API.
+- All personal data (closet photos, profile, trips) stays on the local machine except the content sent to the OpenAI API for processing. The UI shows a one-time notice explaining that clothing photos and itinerary text are sent to OpenAI's API.
 - Photos are stripped of EXIF metadata (including GPS location) before storage or upload.
 
 ### Dependency security
@@ -197,7 +200,7 @@ data/                # Local SQLite DB and uploaded photos (gitignored)
 | HTTP mocking | respx | Mock Open-Meteo and Nominatim responses |
 | LLM mocking | Fake client implementing the LLM `Protocol` / `unittest.mock.AsyncMock` | Agent loop tested with scripted tool-call sequences |
 | Integration | FastAPI `TestClient` with dependency overrides | Each endpoint: happy path, validation error, upstream failure |
-| Live smoke tests | pytest marker `@pytest.mark.live`, skipped unless `RUN_LIVE_TESTS=1` | A few end-to-end calls to the real Gemini and Open-Meteo APIs, run manually before the demo |
+| Live smoke tests | pytest marker `@pytest.mark.live`, skipped unless `RUN_LIVE_TESTS=1` | A few end-to-end calls to the real OpenAI and Open-Meteo APIs, run manually before the demo |
 | Coverage | pytest-cov | ≥ 80% line coverage for `domain/` and `tools/`; ≥ 60% overall |
 | Static checks | ruff, mypy --strict | Must pass before merging to `main` |
 
@@ -409,8 +412,9 @@ Every LLM call that feeds program logic uses a Pydantic schema as the response s
 import os
 from typing import Literal
 
-from google import genai
-from google.genai import types
+import base64
+
+from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from closetcast.domain.errors import ClosetCastError
@@ -432,29 +436,31 @@ class ClothingTags(BaseModel):
 
 
 async def tag_clothing_photo(
-    client: genai.Client, image_bytes: bytes, mime_type: str
+    client: AsyncOpenAI, image_bytes: bytes, mime_type: str
 ) -> ClothingTags:
     """Vision LLM call with structured output: the model must return JSON matching
-    ClothingTags, which Pydantic validates before anything is saved."""
-    response = await client.aio.models.generate_content(
-        model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
-        contents=types.Content(
-            role="user",
-            parts=[
-                types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
-                types.Part.from_text(text=TAGGING_PROMPT),
-            ],
-        ),
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=ClothingTags,
-            temperature=0.2,
-        ),
+    ClothingTags, which the SDK parses and Pydantic validates before anything is saved."""
+    data_url = f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode()}"
+    response = await client.responses.parse(
+        model=os.environ["OPENAI_MODEL_FAST"],
+        input=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "input_image", "image_url": data_url},
+                    {"type": "input_text", "text": TAGGING_PROMPT},
+                ],
+            }
+        ],
+        text_format=ClothingTags,
+        temperature=0.2,
     )
-    if response.text is None:
+    if response.output_parsed is None:
         raise ClosetCastError(code="TAGGING_FAILED", message="Model returned no tags")
-    return ClothingTags.model_validate_json(response.text)
+    return response.output_parsed
 ```
+
+*Note: confirm this call shape (Responses API `parse` with `text_format`) against the current `openai` Python SDK docs at the start of Construction, including which JSON-schema keywords (e.g., `minimum`/`maximum` from `ge`/`le`) strict structured output accepts.*
 
 ### Example: typical tests
 
@@ -519,12 +525,12 @@ async def test_get_daily_forecast_rejects_dates_beyond_horizon() -> None:
 
 
 async def test_tag_clothing_photo_parses_structured_output() -> None:
-    fake_response = MagicMock(
-        text='{"category": "outerwear", "subcategory": "rain jacket", "primary_color": "navy",'
+    parsed = ClothingTags.model_validate_json(
+        '{"category": "outerwear", "subcategory": "rain jacket", "primary_color": "navy",'
         ' "pattern": "solid", "formality": 2, "warmth": 2, "rain_suitable": true}'
     )
     fake_client = MagicMock()
-    fake_client.aio.models.generate_content = AsyncMock(return_value=fake_response)
+    fake_client.responses.parse = AsyncMock(return_value=MagicMock(output_parsed=parsed))
 
     tags = await tag_clothing_photo(fake_client, b"fake-jpeg-bytes", "image/jpeg")
 
