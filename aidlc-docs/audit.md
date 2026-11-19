@@ -344,3 +344,11 @@ X) Other (please describe after [Answer]: tag below)
 **Context**: INCEPTION - Units Generation, awaiting explicit approval
 
 ---
+
+## Git Housekeeping - Diverged Branch
+**Timestamp**: 2026-11-19T18:11:11Z
+**User Input**: "can you help me solve the merge conflict"
+**AI Response**: "Checked git state: no merge in progress; local main (9b11b04 'Complete up to Unit Generation') and origin/main (3ae2dea 'support WebP format' by teammate) had diverged by one commit each, touching disjoint files (teammate deleted TECHNICAL_ENVIRONMENT.md and added WebP to docs/vision.md Feature 1; consistent with requirements FR-1.1). Rebased the local commit onto origin/main with no conflicts (new local commit 7f7a5cb). Not pushed; awaiting user confirmation. Units Generation approval still pending."
+**Context**: Outside AI-DLC stages (repository maintenance during INCEPTION - Units Generation approval gate)
+
+---
