@@ -37,9 +37,9 @@ It stays achievable because it runs locally for one user and uses free data sour
 
 ## Collaboration plan
 
-- **Meetings:** twice a week, ~90 minutes, on **[TODO: days]** at **[TODO: place]**, with Zoom as backup. The first meeting is dedicated to the problem, users and why an LLM fits.
+- **Meetings:** twice a week, ~90 minutes, on Tuesdays and Thursdays during and after class, with Zoom as backup. The first meeting is dedicated to the problem, users and why an LLM fits.
 - **AI-DLC sessions:** run together. One member drives Claude Code with screen shared; the team agrees on every answer and approval, which AI-DLC records in `aidlc-docs/audit.md`.
-- **Between meetings:** **[TODO: chat tool]** for quick questions; GitHub Issues for tasks. Everyone reads newly generated AI-DLC documents before the next session.
+- **Between meetings:** claude for quick questions; GitHub Issues for tasks. Everyone reads newly generated AI-DLC documents before the next session.
 - **Construction:** each member owns AI-DLC units of work, uses feature branches, and gets PRs reviewed by a teammate. Everyone shares testing, the demo video and the presentation.
 
 ## Repository structure
