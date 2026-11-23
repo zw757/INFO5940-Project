@@ -352,3 +352,21 @@ X) Other (please describe after [Answer]: tag below)
 **Context**: Outside AI-DLC stages (repository maintenance during INCEPTION - Units Generation approval gate)
 
 ---
+
+## Repository Housekeeping - README Update
+**Timestamp**: 2026-11-23T01:45:00Z
+**User Input**: "are you talking about the main branches? Could you change the read.me on main"
+**AI Response**: "Committed a README.md-only change to main (commit 8fc7ebc): added a dated timeline following units U1-U4, named the owner of each unit in the collaboration plan, and expanded the repository structure listing. No AI-DLC artifacts, input documents, or rule files were changed."
+**Context**: Outside AI-DLC stages (README maintenance during INCEPTION - Units Generation approval gate)
+
+---
+
+## Units Generation - Approval
+**Timestamp**: 2026-11-23T01:53:14Z
+**AI Prompt**: "Units Generation complete. Review aidlc-docs/inception/application-design/unit-of-work.md, unit-of-work-dependency.md, and unit-of-work-story-map.md (including the boundary adjustment) and either Request Changes or Approve & Continue to CONSTRUCTION PHASE."
+**User Response**: "Approve & Continue on Units Generation. We approve the units of work, including the boundary adjustment. Stop here and do not start Construction."
+**Status**: Approved
+**AI Response**: "Recorded approval. Marked Units Generation complete in aidlc-state.md. INCEPTION phase complete. Per the user's instruction, the workflow stops here; CONSTRUCTION (starting with U1 Foundation & Agent Core - Functional Design) has NOT been started and no construction artifacts or code were created."
+**Context**: INCEPTION - Units Generation APPROVED; INCEPTION phase complete; workflow paused before CONSTRUCTION at user's request
+
+---
