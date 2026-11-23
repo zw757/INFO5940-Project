@@ -167,7 +167,7 @@ E) N/A — no disaster recovery target; losing local data is acceptable for the 
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)
 
 ### Clarification Question 11 (RESILIENCY-08): Regional topology
 Does this workload need multi-zone or multi-region deployment?
@@ -180,7 +180,7 @@ C) Multi-region deployment
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)
 
 ### Clarification Question 12 (RESILIENCY-03): Change management process
 How should changes to `main` be governed?
@@ -193,7 +193,7 @@ C) N/A — exempt (student project); document the reason
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)
 
 ### Clarification Question 13 (RESILIENCY-04): CI/CD tooling
 What CI/CD tooling should run the quality gate?
@@ -204,7 +204,7 @@ B) No CI; each team member runs the quality gate locally before merging
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)
 
 ### Clarification Question 14 (RESILIENCY-04): Rollback mechanism
 How should a bad change be rolled back?
@@ -215,7 +215,7 @@ B) Version-pinned rollback plus a backup of `data/closetcast.db` taken automatic
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)
 
 ### Clarification Question 15 (RESILIENCY-04): Deployment style
 What deployment style applies?
@@ -226,7 +226,7 @@ B) Tagged releases: users only update to git tags marking tested milestones (e.g
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)
 
 ### Clarification Question 16 (RESILIENCY-15): Incident response process
 How are problems with the app handled?
@@ -237,4 +237,4 @@ B) No formal process; AI-DLC should propose one
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)

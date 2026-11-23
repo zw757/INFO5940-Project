@@ -370,3 +370,11 @@ X) Other (please describe after [Answer]: tag below)
 **Context**: INCEPTION - Units Generation APPROVED; INCEPTION phase complete; workflow paused before CONSTRUCTION at user's request
 
 ---
+
+## Requirements Analysis - Fill Skipped Clarification Answers (post-Inception correction)
+**Timestamp**: 2026-11-23T02:00:43Z
+**User Input**: "1. Please fill Clarification Questions 10–16 with “N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)” and log this in audit.md."
+**AI Response**: "Filled the seven blank [Answer]: tags for Clarification Questions 10-16 in aidlc-docs/inception/requirements/requirement-clarification-questions.md with 'N/A – skipped because we chose CQ9 = B (Resiliency Baseline turned off)'. This records the decision already made at 2026-11-19T17:29:14Z (CQ10-16 intentionally blank because CQ9 = B). No requirements, stories, design, or unit artifacts changed; Resiliency Baseline remains disabled in aidlc-state.md. No [Answer]: tags remain blank in any question file."
+**Context**: INCEPTION (complete) - documentation correction to Requirements Analysis question file; workflow remains paused before CONSTRUCTION
+
+---
