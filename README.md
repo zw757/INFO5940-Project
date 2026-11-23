@@ -49,7 +49,7 @@ AI-DLC Inception split the work into four units of work, built in order during C
 
 - **Meetings:** twice a week, ~90 minutes, on Tuesdays and Thursdays during and after class, with Zoom as backup. The first meeting is dedicated to the problem, users and why an LLM fits.
 - **AI-DLC sessions:** run together. One member drives Claude Code with screen shared; the team agrees on every answer and approval, which AI-DLC records in `aidlc-docs/audit.md`.
-- **Between meetings:** claude for quick questions; GitHub Issues for tasks. Everyone reads newly generated AI-DLC documents before the next session.
+- **Between meetings:** an iMessage group chat for quick questions; GitHub Issues for tasks. Everyone reads newly generated AI-DLC documents before the next session.
 - **Construction:** each member owns AI-DLC units of work: **U1** Foundation & Agent Core (whole team), **U2** Closet, Profile & Gaps (May Wu), **U3** Daily, Occasion & Refine (Katherine Yang), and **U4** Trip, Packing & Trip Refinement (Emma Dai). The unit owner drives that unit's AI-DLC session, works on a feature branch, and gets PRs reviewed by a teammate before merging to `main`. Everyone shares testing, the demo video and the presentation.
 
 ## Repository structure
