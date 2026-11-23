@@ -14,7 +14,7 @@
 
 - **AI coding agent:** Claude Code
 - **Methodology:** **AI-DLC v1.0.1** ([release](https://github.com/awslabs/aidlc-workflows/releases/tag/v1.0.1)), installed at `CLAUDE.md` and `.aidlc-rule-details/`
-- **LLM in the product:** OpenAI API (vision-capable models set by config: `OPENAI_MODEL_FAST`, `OPENAI_MODEL_AGENT`). Changed from Google Gemini on 2026-11-19 during AI-DLC Requirements Analysis.
+- **LLM in the product:** OpenAI API with two models: **`gpt-6-luna`** (`OPENAI_MODEL_FAST`) for photo tagging and itinerary/event parsing, and **`gpt-6.2-sol`** (`OPENAI_MODEL_AGENT`) for the agent's tool calling and reasoning. Both support image input, function calling and structured output; model names are config settings, so they can change without code changes. Changed from Google Gemini on 2026-11-19 during AI-DLC Requirements Analysis.
 - **Other services:** Open-Meteo (weather, geocoding), OpenStreetMap Nominatim (places)
 
 ## Problem and why an LLM fits
@@ -25,7 +25,7 @@ An LLM fits because almost every input is unstructured and needs judgment. Cloth
 
 ## Planned LLM integration
 
-ClosetCast is an **LLM agent with tools**, built as a small custom function-calling loop on the **OpenAI API** (models set by config) via the official `openai` Python SDK. LLM capabilities appear in four places: **vision tagging** turns each closet photo into an editable item record; **parsing** turns itineraries and event descriptions into structured days and occasions; the **agent loop** chooses which tools to call (`get_weather`, `geocode`, `lookup_place`, `get_dress_code_guidance`, `search_closet`, `get_style_profile`, `optimize_packing`, `build_search_link`) and combines the results into outfits with explanations; and **refinement** revises a plan from plain-language feedback ("no skirts this trip"). Features that depend on the LLM: closet tagging, daily outfits, the occasion planner, the trip planner, the gap finder and refinement.
+ClosetCast is an **LLM agent with tools**, built as a small custom function-calling loop on the **OpenAI API** (`gpt-6-luna` for tagging and parsing, `gpt-6.2-sol` for the agent) via the official `openai` Python SDK. LLM capabilities appear in four places: **vision tagging** turns each closet photo into an editable item record; **parsing** turns itineraries and event descriptions into structured days and occasions; the **agent loop** chooses which tools to call (`get_weather`, `geocode`, `lookup_place`, `get_dress_code_guidance`, `search_closet`, `get_style_profile`, `optimize_packing`, `build_search_link`) and combines the results into outfits with explanations; and **refinement** revises a plan from plain-language feedback ("no skirts this trip"). Features that depend on the LLM: closet tagging, daily outfits, the occasion planner, the trip planner, the gap finder and refinement.
 
 We deliberately keep some work out of the LLM. The packing optimizer is deterministic Python, because LLMs are unreliable at counting. Every proposed outfit is checked in code against the closet database, so the app never recommends clothes the user doesn't own, and all LLM output is parsed into validated Pydantic schemas. We chose a hosted model over a local Ollama model because we need reliable image understanding and tool calling together, which small local models handle inconsistently on student laptops.
 

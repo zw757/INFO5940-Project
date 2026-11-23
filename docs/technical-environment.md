@@ -2,6 +2,7 @@
 
 > **Change log**
 > - **2026-11-19 (AI-DLC Requirements Analysis):** LLM provider changed from Google Gemini to **OpenAI** by team decision (requirement-verification Q18, clarification Q2–Q4; see `aidlc-docs/audit.md`). All Gemini / `google-genai` references below were replaced with OpenAI / `openai` equivalents.
+> - **2026-11-23 (after Inception):** Planned OpenAI models named by team decision: `gpt-6-luna` for `OPENAI_MODEL_FAST` and `gpt-6.2-sol` for `OPENAI_MODEL_AGENT` (see `aidlc-docs/audit.md`). No requirement, story, design, or unit changed.
 
 ## Project Technical Summary
 
@@ -10,7 +11,7 @@
 | Project type | Greenfield, single-user web application |
 | Deployment | **Runs locally only** on each team member's laptop (macOS, Windows or Linux). No cloud hosting. |
 | How it runs | A FastAPI server started with `uv run closetcast` serves both the web UI (server-rendered HTML) and a JSON API at `http://127.0.0.1:8000`. It calls the OpenAI API (hosted LLM) for vision tagging and agent reasoning, and free public APIs for weather and places. Data is stored in a local SQLite file. |
-| LLM provider | **OpenAI API** (paid; each team member uses their own API key with a monthly budget set in the OpenAI dashboard). Two models, set by environment variables so they can change without code changes: `OPENAI_MODEL_FAST` (small, low-cost model for vision tagging and itinerary/event parsing) and `OPENAI_MODEL_AGENT` (stronger model for the agent's tool-calling and reasoning). Both must support image input, function calling and JSON-schema structured output. Confirm current model names on OpenAI's models page before Construction. |
+| LLM provider | **OpenAI API** (paid; each team member uses their own API key with a monthly budget set in the OpenAI dashboard). Two models, set by environment variables so they can change without code changes: `OPENAI_MODEL_FAST` (small, low-cost model for vision tagging and itinerary/event parsing) and `OPENAI_MODEL_AGENT` (stronger model for the agent's tool-calling and reasoning). Both must support image input, function calling and JSON-schema structured output. Planned models (chosen 2026-11-23 from OpenAI's models page): `OPENAI_MODEL_FAST=gpt-6-luna` ($0.10 / $0.50 per 1M input/output tokens) and `OPENAI_MODEL_AGENT=gpt-6.2-sol` ($2 / $10 per 1M input/output tokens). |
 | Timeline | Student team project; Construction runs Nov 24 – Dec 16, 2026 |
 
 ## Programming Languages

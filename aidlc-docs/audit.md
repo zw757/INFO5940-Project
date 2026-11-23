@@ -378,3 +378,11 @@ X) Other (please describe after [Answer]: tag below)
 **Context**: INCEPTION (complete) - documentation correction to Requirements Analysis question file; workflow remains paused before CONSTRUCTION
 
 ---
+
+## Input Document Update - Planned OpenAI Models Named (post-Inception)
+**Timestamp**: 2026-11-23T02:06:04Z
+**User Input**: "OPENAI_MODEL_FAST (photo tagging, itinerary/event parsing)" / "help me find" / "gpt-5-mini" / then, in a follow-up multiple-choice question, chose "gpt-6-luna (Recommended)" for OPENAI_MODEL_FAST and "gpt-6.2-sol (Recommended)" for OPENAI_MODEL_AGENT.
+**AI Response**: "Checked OpenAI's current models page: gpt-5-mini is no longer listed; current options are gpt-6-luna (small, $0.10/$0.50 per 1M tokens), gpt-6.2-sol (agent-oriented, $2/$10) and gpt-6.2-astra (flagship, $8/$40); all support image input, function calling and structured outputs. After the user's choice, named the planned models in README.md (Tools and Planned LLM integration), docs/technical-environment.md (Project Technical Summary plus a change-log entry), and .env.example (default values). The models remain configurable through OPENAI_MODEL_FAST / OPENAI_MODEL_AGENT, consistent with requirements decision CQ2 = B, so no requirements, stories, application design, or units of work changed."
+**Context**: INCEPTION (complete) - input document and README update; workflow remains paused before CONSTRUCTION
+
+---
