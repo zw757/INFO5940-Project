@@ -1,99 +1,100 @@
-# Vision: ClosetMate, an AI Wardrobe and Packing Assistant
+# Vision: ClosetCast — An AI Stylist That Plans Outfits From the Clothes You Already Own
 
 ## Executive Summary
 
-ClosetMate is a local web app that turns a person's real closet into a personal stylist and packing planner. The user photographs their clothes once. A vision LLM tags each item (category, color, formality, warmth, and so on), and an LLM agent then uses that digital closet with live weather data and the user's plans to answer three everyday questions: *What should I wear today?*, *What should I pack for this trip?*, and *What should I wear (or buy) for this special occasion?* Every recommendation uses clothes the user already owns, explains its reasoning, and lists only the genuine gaps worth buying. ClosetMate is for busy students and young professionals who own enough clothes but still waste time each morning, overpack for trips, and impulse-buy before events.
+ClosetCast is a locally run web app that acts as a personal stylist built on the user's real wardrobe. The user photographs their clothes once; an LLM with vision tags every item (category, color, formality, warmth). From then on, ClosetCast answers three questions: *What should I wear today?*, *What should I wear to this event?*, and *What should I pack for this trip?* An LLM agent answers each one by calling tools: a weather service, a place and dress-code lookup, the user's closet database, and a packing optimizer. It then explains its choices. When the closet can't cover a situation (no rain jacket for a rainy trip, nothing formal enough for a black-tie wedding), ClosetCast says what is missing, why it matters, and what to look for when buying it. The product is for students and young professionals who don't want to think about getting dressed every morning, who travel with limited luggage, or who have occasions with dress codes they don't fully understand.
 
 ## Problem Statement
 
-People make clothing decisions every day with poor information. They forget what they own, can't easily match outfits to the weather or the day's activities, and repeat the same few items. These problems get worse at two moments. **Travel**: a multi-city itinerary with mixed activities (hiking, a business meeting, a dinner) and changing weather leads to overpacking, missing items, or last-minute purchases. **Special occasions**: a wedding, interview, or themed party with a dress code ("cocktail attire", "business casual", "black tie optional") leads people to buy something new without checking whether their closet already has a workable outfit.
+Deciding what to wear means weighing several things at once: the weather (often at a destination the user has never been to), what the user is doing that day, the dress expectations of each place (a temple that requires covered shoulders, a restaurant with a jacket rule, an outdoor wedding on grass), personal style, and, for trips, how much fits in a suitcase. People handle this badly in two ways. Day to day, they waste time and fall back on the same few outfits while most of the closet goes unworn. For trips and events, they overpack "just in case," forget the one item they needed, or show up underdressed because a dress code like "cocktail attire" or "smart casual" was ambiguous.
 
-Existing tools fall short. Weather apps don't know your closet. Closet-catalog apps require tedious manual tagging and offer rule-based suggestions that ignore context. Generic chatbots give advice like "bring a light jacket" that ignores what you own. Solving this needs a system that can (1) understand photos of clothing, (2) read unstructured plans such as an itinerary, an event invitation, or "office then gym then dinner", (3) gather live facts such as forecasts, and (4) reason across all of it to produce a concrete, explained plan. That combination of perception, language understanding, tool use, and multi-step reasoning is what LLM agents are good at.
+Existing closet apps catalog clothes and match outfits to a temperature, but they treat each day separately and mostly ignore *where* the user is going. Packing-list apps don't know what the user owns. Neither can interpret an unstructured itinerary ("Day 2: Sagrada Família in the morning, tapas dinner, then a rooftop bar") or explain why an outfit fits. These tasks need language understanding (reading itineraries and dress codes), visual understanding (recognizing clothing from photos), and reasoning over several constraints at once. That combination is what an LLM agent with tools can do and a rules-based app cannot.
 
 ## Target Users
 
-| User type | Description | What they need from ClosetMate |
+| User type | Description | Primary needs |
 | --- | --- | --- |
-| Daily dresser (primary) | Student or young professional with a varied weekly schedule (classes, office, gym, evening plans) | A fast, weather-aware daily outfit from their own closet that fits the day's activities and doesn't repeat yesterday's |
-| Frequent traveler | Takes 2–8 trips per year: weekend trips, conferences, multi-city vacations | Upload or paste an itinerary and get a day-by-day outfit plan plus a minimal packing list, with re-wearable pieces and carry-on limits respected |
-| Occasion planner | Has an upcoming wedding, interview, gala, or themed event with a dress code | Outfit options from their closet that meet the dress code, and if nothing works, a short, specific list of what to buy |
+| Everyday dresser | Student or young professional getting ready on a normal day | A quick, weather-appropriate outfit from their own closet; variety beyond the same 3 outfits |
+| Traveler | Takes 2–10 day trips (spring break, conferences, visiting family, study abroad), often carry-on only | A day-by-day outfit plan and a minimal packing list that covers every day's weather and activities |
+| Occasion attendee | Has a specific event: wedding, interview, formal, gala, funeral, first date | An explanation of what the dress code means and an outfit from their closet, or what to buy if they don't own one |
 
-## Key Success Metrics
+All users are a single local user per installation for the MVP (no accounts, no sharing).
 
-| Metric | Target (measured during final demo / team testing) |
-| --- | --- |
-| Auto-tagging accuracy | ≥ 85% of auto-generated tags (category, primary color, formality) accepted by the user without editing, on a test set of ≥ 40 real clothing photos |
-| Daily outfit usefulness | ≥ 4 of 5 daily recommendations rated "would wear" by team testers across ≥ 20 test days with varied weather |
-| Itinerary extraction | Destinations, dates, and activities correctly extracted from ≥ 9 of 10 sample itineraries (pasted text and PDF) |
-| Packing list quality | Every planned outfit is buildable from the packing list; packing list contains ≥ 25% fewer items than a naive "one outfit per day" list for trips ≥ 5 days |
-| Grounding | 100% of recommended "owned" items exist in the user's closet (no hallucinated items); all "buy" items are clearly labeled as not owned |
-| Response time | Daily outfit returned in ≤ 20 seconds; trip plan for a 7-day trip in ≤ 60 seconds |
+## Success Metrics
 
-## Full Scope Vision (long term, beyond this course)
+| Metric | Target | How measured |
+| --- | --- | --- |
+| Clothing tagging accuracy | ≥ 85% of items get the correct category and primary color with no user edits | Team test set of 60 labeled clothing photos |
+| Closet faithfulness | 100% of recommended outfits use only items in the user's closet (anything else is labeled as a "buy" suggestion) | Automated check in tests; verified by code, not the LLM |
+| Weather appropriateness | 0 outfits that contradict the weather data (e.g., no coat when the high is above 27°C / 80°F, a rain layer when rain probability ≥ 60%) | Rule-based validator run on 20 test scenarios |
+| Trip coverage | 100% of itinerary days get an outfit; packing list contains every item used in the plan | Automated check on 10 sample itineraries |
+| Packing efficiency | For a 5-day carry-on trip, ≤ 12 clothing items (excluding underwear, socks and sleepwear) produce ≥ 5 distinct outfits | Packing optimizer output on sample itineraries |
+| Response time | Daily outfit ≤ 15 s; 7-day trip plan ≤ 90 s on a laptop with a normal connection | Timed in demo runs |
+| User satisfaction | Average ≥ 4/5 "would wear this" rating from team members and 5 outside testers | Ratings collected in the app during testing week |
 
-- **Closet intelligence**: auto-tagging from photos, background removal, duplicate detection, cost-per-wear tracking, "closet gaps" analysis, laundry status.
-- **Daily styling**: weather- and calendar-aware outfits, style learning from feedback, outfit history and rotation, "complete the look" suggestions.
-- **Trip planning**: itinerary parsing from text, PDF, email, or booking confirmations; climate-aware planning for far-future trips; capsule packing; luggage constraints; laundry-on-trip planning; shared packing lists for group trips.
-- **Occasions**: dress-code interpretation, cultural/venue norms, multiple outfit options, shopping suggestions with real product links and budget filters.
-- **Integrations**: calendar sync (Google/Outlook), retailer APIs, virtual try-on images, mobile app with camera capture, sustainability insights (rent/borrow/second-hand).
+## Full Scope Vision
 
-## MVP Scope: Features IN
+What ClosetCast could become past this course:
 
-If a feature is not listed here, it is not in the MVP.
+- **Wardrobe intelligence:** cost-per-wear tracking, "you haven't worn this in 6 months" nudges, donate/resell suggestions, laundry-aware planning.
+- **Shopping:** price comparison across retailers, secondhand-first suggestions, links to buy, alerts when a wishlist item goes on sale.
+- **Trips:** import itineraries from email, calendar or booking confirmations; multi-traveler trips (coordinating a group's outfits for a wedding party); weather-change alerts during the trip with re-planning.
+- **Visual experience:** virtual try-on, auto-generated outfit collages with background removal, mobile app with camera capture.
+- **Social:** share an outfit plan with a friend for feedback; borrow items from friends' closets.
+- **Learning:** a style model that learns from what the user actually wears, not just ratings.
+
+## MVP Scope — Features IN
 
 | # | Feature | Description | Rationale |
 | --- | --- | --- | --- |
-| 1 | Closet upload with AI auto-tagging | Upload one or more clothing photos (JPEG/PNG/WebP). A vision LLM returns structured tags: category, subcategory, primary/secondary colors, pattern, material guess, formality (1–5), warmth (1–5), suitable seasons, and a short description. Tags are validated against a fixed schema. | Manual tagging is the main reason closet apps get abandoned; this is the core LLM perception feature. |
-| 2 | Closet management | Browse the closet as a photo grid; filter by category, color, formality, season; edit any tag; delete items; mark items unavailable (e.g., in the laundry). | Users must be able to correct AI mistakes, and the agent must only use available items. |
-| 3 | Style profile | One-time profile: preferred style keywords, home city, temperature sensitivity (runs cold / neutral / runs warm), items or colors to avoid, typical weekly activities. | Personalizes every recommendation; gives the agent stable context. |
-| 4 | Daily outfit recommendation (agent) | User picks a date (default today) and optionally types the day's plans ("lab in the morning, interview at 2pm, drinks after"). The agent calls tools to get the weather for the user's city, search the closet, and check recent wear history, then returns 1 primary outfit + 1 alternative, each with a short explanation tied to weather and activities. | The core daily use case; demonstrates agentic tool use. |
-| 5 | Outfit feedback and wear log | Thumbs up/down on an outfit, "swap this item" (agent proposes a replacement), and "I wore this" (logs wear date). | Avoids repeats, gives the agent history, and lets users steer results. |
-| 6 | Trip planner from itinerary (agent) | User pastes an itinerary or uploads a PDF/TXT. The agent extracts a structured trip (cities, date ranges, planned activities), shows it for the user to confirm or edit, then fetches weather per city/date (forecast if within 16 days, otherwise historical climate averages for those dates) and produces: (a) a day-by-day outfit plan, (b) a consolidated packing list with quantities that re-uses versatile items, and (c) a "consider buying" list for gaps (e.g., no rain jacket for a rainy week). | Main differentiator; multi-step agent reasoning over documents, tools, and closet. |
-| 7 | Special occasion planner (agent) | User describes an event (type, dress code if known, date, location, indoor/outdoor, any notes) or pastes the invitation text. The agent interprets the dress code, checks weather for the date/location, and returns up to 3 outfit options from the closet, each rated for dress-code fit, or explains why the closet falls short. | Covers the "special occasion" use case the team identified; tests nuanced language interpretation. |
-| 8 | Shopping gap list | All "consider buying" items from trips and occasions are collected into one list. Each entry has a generic description (e.g., "navy unstructured blazer"), why it is needed, which plan it came from, a rough price band, and a retailer-neutral web search link. The user can dismiss items or mark them purchased (then add a photo to the closet). | Turns "what should I buy?" into a concrete, justified, deduplicated list without e-commerce integration. |
-| 9 | Saved plans | Trip and occasion plans are saved and can be reopened, regenerated, or deleted. | Users plan trips days in advance and come back to them. |
-| 10 | Guardrails and transparency | Every recommendation shows which tools were used (e.g., "Weather: 8°C, 70% rain in Boston on Mar 3") and labels owned vs. to-buy items. Owned items are validated against the database before display. Friendly errors when the LLM or weather API is unavailable. | Builds trust and prevents hallucinated items; important for an agentic product. |
+| 1 | Digital closet with AI tagging | Upload photos of clothing (one item per photo, JPEG/PNG/WebP, up to 10 MB). A vision LLM returns structured tags: category, subcategory, primary/secondary color, pattern, formality (1–5), warmth (1–5), season, and rain-suitability. The user can review and edit any tag. Items can also be added manually without a photo. | Everything else depends on knowing what the user owns. Vision tagging removes the main barrier: typing in a whole closet by hand. |
+| 2 | Style profile | A short onboarding form: preferred styles (e.g., minimal, streetwear, preppy), colors to avoid, comfort priorities (e.g., "no heels," "always flat shoes for walking days"), temperature sensitivity (runs cold / normal / runs warm), and preferred units (°F/°C). Users can rate any recommended outfit thumbs up or down with an optional comment. | Recommendations must reflect the person's taste, not generic fashion rules. Ratings give the agent feedback to use in later recommendations. |
+| 3 | Daily outfit recommendation | User asks for today's outfit, optionally describing plans ("class, then gym, then dinner downtown"). The agent fetches today's weather for the user's home city, picks a primary outfit plus one alternative from the closet, and explains why (weather, activities, style). | Covers the most frequent use case and is the simplest end-to-end path through the agent. |
+| 4 | Special occasion planner | User describes an event in free text (type, date, location, stated dress code, indoor/outdoor). The agent interprets the dress code using a curated dress-code guide, checks the weather at that place and date, and either proposes outfits from the closet or reports what is missing. | Dress codes are ambiguous and stressful to interpret. Turning "garden-party cocktail attire in June" into concrete guidance is a language task an LLM handles well. |
+| 5 | Trip planner from an itinerary | User pastes an itinerary as text or uploads it as a PDF, then sets luggage size (personal item, carry-on, checked). The agent extracts each day's city, places and activities into a structured plan, fetches weather for each day (a forecast if the day is within 16 days; otherwise historical averages for those dates), looks up dress norms for each place, and produces a day-by-day outfit plan. | This is the most distinctive feature: it reasons across the whole trip instead of planning each day separately. |
+| 6 | Packing optimizer | From the trip plan, a deterministic optimizer (plain Python, not the LLM) picks the smallest set of items that covers every day's outfit needs within the luggage limit and the user's re-wear rules (default: bottoms and outerwear may repeat; tops may repeat after 2 days). Outputs a packing checklist and an outfit matrix (item × day). | LLMs are unreliable at combinatorial counting. Delegating this to code gives provably consistent results and is a clear example of an agent using a tool. |
+| 7 | Gap finder (what to buy) | When the closet can't satisfy a requirement (weather, dress code, activity), the agent produces a prioritized "consider buying" list: item type, required attributes (e.g., "waterproof, packable, neutral color to match your navy and grey items"), why it is needed, and which days or events it covers. Each suggestion includes a generic web search link; no prices are scraped. | Delivers the "what should I buy" value from the original idea without fragile retailer scraping. |
+| 8 | Explain and refine | Every recommendation includes a short explanation. The user can give feedback in plain text ("no skirts this trip," "swap the blazer for something warmer," "I'll be walking 20,000 steps on day 3") and the agent revises the plan while keeping the rest of it unchanged. | Lets users trust and correct the agent, and turns a one-shot generator into a real assistant. |
 
-## MVP Scope: Features OUT
+## MVP Scope — Features OUT
 
 | Feature | Reason for exclusion | Target phase |
 | --- | --- | --- |
-| Multi-user accounts, login, and authentication | Product runs locally for one user on a laptop; auth adds work without demo value | Phase 2 |
-| Calendar sync (Google/Outlook) | OAuth setup is time-consuming; typed day plans cover the use case for the MVP | Phase 2 |
-| Real product search, prices, or affiliate/retailer APIs | API access, costs, and terms of service; generic descriptions plus a search link are enough | Phase 2 |
-| Purchasing/checkout | Out of product scope and raises payment and security concerns | Not planned |
-| Virtual try-on / AI-generated outfit images | Expensive, slow, and image generation is not needed to solve the core problem | Phase 3 |
-| Automatic background removal / photo editing | Nice to have; vision tagging works on ordinary photos | Phase 2 |
-| Mobile app or camera capture | Local web app in a desktop/mobile browser is enough for the MVP | Phase 3 |
-| Parsing emails, booking confirmations, or images of itineraries | Pasted text and PDF/TXT upload cover the core flow | Phase 2 |
-| Size/fit recommendations and body measurements | Sensitive data and needs retailer size data | Phase 3 |
-| Luggage weight/volume optimization | Item counts and a carry-on vs. checked flag are enough for MVP | Phase 2 |
-| Laundry-on-trip planning beyond a simple "re-wear allowed" rule | Adds complexity to the planner | Phase 2 |
-| Social sharing, friends' closets, group packing lists | Not core to a single user's problem | Phase 3 |
-| Cloud deployment / hosting | Course requires only a local demo | Not planned for course |
-| Fine-tuning or training custom models | Hosted foundation models with good prompts and tools are enough | Not planned |
+| Price comparison across retailers / scraping store websites | No free universal shopping API; scraping is brittle, often against retailers' terms of service, and would consume most of Construction | Phase 2 (via an official shopping API if one becomes available) |
+| Buying or checkout inside the app, affiliate links | Not needed to validate the core value; adds legal and payment complexity | Phase 3 |
+| Virtual try-on / AI image generation of outfits | Expensive, slow, and unreliable on free tiers; not core to the decision | Phase 3 |
+| Automatic background removal and outfit collage images | Nice visual polish but not required for the demo; outfit cards show the original item photos side by side | Phase 2 |
+| Mobile app | The course requires only a locally running product; a responsive web page is enough | Phase 3 |
+| User accounts, login, multi-user, cloud hosting | Product runs locally for a single user; the course does not require hosting | Phase 2 |
+| Importing itineraries from email, Google Calendar or booking sites | OAuth integrations add significant work; pasted text and PDF cover the core use case | Phase 2 |
+| .ics calendar file import | Lower priority than text/PDF; may be added if time allows | Phase 2 |
+| Laundry tracking and cost-per-wear analytics | Requires daily logging habits; not needed for the three core questions | Phase 2 |
+| Weather alerts and re-planning during a trip (notifications) | Requires background jobs and notifications | Phase 2 |
+| Group or shared trips | Multi-user coordination is out of scope for a single-user local app | Phase 3 |
+| Learning a style model from wear history | Ratings and the style profile are enough for the MVP | Phase 3 |
 
-## Risks
+## Risks and Open Questions
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Vision model mis-tags items (e.g., navy vs. black, wool vs. acrylic) | Medium | Medium | Fixed tag schema, user can edit every tag, test set of real photos to measure accuracy |
-| Agent recommends items the user doesn't own (hallucination) | Medium | High | Agent may only reference items by ID returned from the closet search tool; server validates every ID before display |
-| Weather API unavailable or trip dates beyond forecast range | Medium | Medium | Use climate averages for dates beyond 16 days; label the data source; cache results; degrade gracefully with a "weather unavailable" note |
-| Hosted LLM cost or rate limits during development | Medium | Medium | Configurable model name, cache tagging results, small test closets, per-request token limits, mocked LLM in automated tests |
-| Privacy: clothing photos and travel plans are sent to a hosted LLM provider | Low | Medium | Disclose in the UI; photos stay on the local disk; send only resized images; no personal identifiers in prompts |
-| Prompt injection via pasted itinerary or invitation text | Low | Medium | Treat user documents as data inside delimited blocks; tools are read-only except explicit, user-confirmed writes |
-| Scope creep from three use cases | Medium | High | All three use cases share one closet, one weather tool, and one agent core; strict IN/OUT tables |
+### Risks
 
-## Open Questions
+| Risk | Impact | Mitigation |
+| --- | --- | --- |
+| Vision model mis-tags items (e.g., navy vs. black, blazer vs. shirt jacket) | Bad outfit suggestions | User review/edit step after tagging; tags stored as structured fields the user can correct |
+| LLM recommends items the user doesn't own | Breaks user trust | Agent may only select items by closet ID; code validates every outfit against the database and rejects unknown IDs |
+| Hosted LLM free-tier rate limits during bulk photo tagging | Slow onboarding, failed requests | Tag photos in a queue with retry and backoff; cache results; let the user tag in batches |
+| Weather forecast unavailable beyond 16 days | Trip plans for distant dates lack forecasts | Fall back to historical averages for the same dates in recent years, and label the plan as "based on typical weather" |
+| Dress-code guidance for a specific venue is wrong or unknown | User underdressed | Use a curated dress-code guide for common venue and event types; when uncertain, the agent says so and suggests the safer (more formal) option |
+| Clothing photos sent to a hosted API raise privacy concerns | User discomfort | Clear notice before upload; send only clothing photos, never personal data; API key stored locally |
+| Scope is too large for the Construction window (Nov 24 – Dec 16) | Unfinished features | Features 1, 3, 5, 6 are the critical path; 7 and 8 can be simplified if needed |
 
-1. **Outfit composition rules**: What makes a valid outfit (e.g., top + bottom or one-piece + shoes, optional outerwear and accessories)? Should rules be hard-coded, left to the LLM, or both (LLM proposes, code validates)?
-2. **Trips beyond the forecast window**: For trips more than 16 days away, is a historical climate average for those dates acceptable, and should the plan be flagged for a refresh closer to departure?
-3. **Re-wear and laundry assumptions for trips**: How many times can each category be re-worn on a trip by default (e.g., jeans 3×, t-shirts 1×)? Should the user be able to set "laundry available on day N"?
-4. **Luggage constraint**: Should the trip planner take a carry-on-only flag that tightens the packing list?
-5. **How many outfit options**: 1 primary + 1 alternative for daily outfits, and up to 3 for occasions. Is that the right balance between choice and speed/cost?
-6. **Buy list detail**: Should "consider buying" items include a price band and a generic web search link, or only a description? How do we avoid sounding like advertising?
-7. **Itinerary formats**: Is pasted text + PDF/TXT enough for the MVP, or do we need image/screenshot itineraries (would reuse the vision model)?
-8. **Feedback learning**: Should thumbs up/down only affect the next request (short-term context), or update the style profile over time?
-9. **Unavailable items**: Should "in the laundry" status reset automatically after N days?
-10. **Cost limits**: What is an acceptable maximum number of LLM calls/tokens per recommendation for our budget?
+### Open Questions
+
+- Should itinerary input in the MVP accept both pasted text and PDF upload, or only pasted text first?
+- What exact threshold switches from forecast to historical averages (the technical environment assumes 16 days, the forecast limit), and is a 5-year average of the same dates a good enough estimate?
+- Should the dress-code knowledge be a curated local guide only, or may the LLM fill gaps from its own knowledge when a venue type isn't in the guide (with a confidence label)?
+- What are the right default re-wear rules for the packing optimizer, and should users be able to change them per trip?
+- How should the optimizer handle items that are needed but not owned: plan around the gap, or assume the user will buy the suggested item?
+- Should an outfit always include shoes and outerwear, or only when the weather or dress code calls for them?
+- How should thumbs-up/down ratings influence future recommendations in the MVP: as notes the agent reads in its prompt, or as stored preferences?
+- Should the daily outfit use the user's home city only, or detect the current location?
+- How many clothing photos should onboarding support at once without hitting API rate limits (e.g., batches of 10)?
